@@ -197,8 +197,8 @@ sensor:
                   state: !lambda |- 
                     return id(distance_cm).state;
               - globals.set:
-                id: distance_cm_last_value
-                value: !lambda 'return x;'
+                  id: distance_cm_last_value
+                  value: !lambda 'return x;'
 
   ##
   # ultrasonic distance sensor.
