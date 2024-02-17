@@ -99,6 +99,13 @@ binary_sensor:
       - delayed_on_off: 800ms
     on_press:
       then:
+        - lambda: |-
+            if (id(clack_uptime).state < 30) {
+              ESP_LOGI("init", "Skipping actions due to recent reboot.");
+              return;
+            }
+            id(totalWaterUsage) = 0;
+            ESP_LOGI("actions", "Proceeding with regeneration actions.");
         - globals.set:
             id: totalWaterUsage
             value: '00'
