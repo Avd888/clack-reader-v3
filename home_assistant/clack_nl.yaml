@@ -19,6 +19,10 @@ input_boolean:
     name: Zoutspoeling Almost Finished
     initial: off
     icon: mdi:timer-sand
+  clack_manual_regen:
+    name: Clack Manual Regen
+    initial: off
+    icon: mdi:water-pump-off
     
 input_number:
   zoutspoeling_alert_time:
@@ -29,6 +33,9 @@ input_number:
     step: 1
     unit_of_measurement: 'minutes'
     icon: mdi:timer-outline
+    
+
+
 #-----------
 #TIMERS       
 #-----------
@@ -36,28 +43,28 @@ input_number:
 timer:
   timer_ws_backwash:
     name: terugspoeling
-    duration: '0:00:10'  
-    #duration: '0:02:10' #original
+    #duration: '0:00:10'  
+    duration: '0:02:10' #original
 
   timer_ws_brine:
     name: zoutspoeling
-    duration: '0:01:10'
-    #duration: '0:57:16' #original
+    #duration: '0:01:10'
+    duration: '0:57:16' #original
 
   timer_ws_rinse:
     name: snelspoeling
-    duration: '0:00:10'
-    #duration: '0:03:05' #original
+    #duration: '0:00:10'
+    duration: '0:03:05' #original
 
   timer_ws_fill:
     name: vullen
-    duration: '0:00:10'
-    #duration: '0:04:55' #original
+    #duration: '0:00:10'
+    duration: '0:04:55' #original
 
   timer_ws_total:  #sum of all above values
     name: total
-    duration: '0:01:40'
-    #duration: '1:07:26' #orginal
+    #duration: '0:01:40'
+    duration: '1:07:26' #orginal
 
 #-----------
 #SENSORS
@@ -318,3 +325,42 @@ automation:
                 data:
                   state: false
     mode: single
+################################################
+  - id: 'clack_manual_regen_control'
+    alias: "Ontharder - Clack Manual Regen Control"
+    description: "Automates the Clack chlorinator for manual regen and auto-off."
+    trigger:
+      - platform: state
+        entity_id: input_boolean.clack_manual_regen
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.clack_manual_regen
+        to: 'off'
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.clack_manual_regen
+                state: 'on'
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.clack_chlorinator
+              - delay:
+                  minutes: 2
+                  seconds: 5
+              - service: switch.turn_off
+                target:
+                  entity_id: switch.clack_chlorinator
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.clack_manual_regen
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.clack_manual_regen
+                state: 'off'
+            sequence:
+              - service: switch.turn_off
+                target:
+                  entity_id: switch.clack_chlorinator
+    mode: restart

@@ -183,6 +183,6 @@ button:
             ESP_LOGI("RegTest", "Regeneration button pressed");
         - if:
             condition:
-            - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
+              - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
             then:
               - script.execute: chlorinator_start

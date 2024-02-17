@@ -145,6 +145,8 @@ button:
   - platform: restart
     id: restart_button
     name: ${name} ${clack_restart}
+    
+
 
 #-----------
 #SENSORS
@@ -335,6 +337,7 @@ select:
     platform: template
     options:
       - ${clack_off}
+      - ${clack_regen}
       - ${clack_chlorinator}
     initial_option: ${clack_off}
     optimistic: true
