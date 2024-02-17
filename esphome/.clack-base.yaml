@@ -32,11 +32,13 @@ api:
             id: clack_l_left
             state: !lambda |-
               return int(id(clack_capacity_liters).state - id(clack_watermeter).state);
-    - service: toggle_zoutspoeling_almost_finished
+    - service: set_zoutspoeling_almost_finished
+      variables:
+        state: bool
       then:
         - lambda: |-
-            id(zoutspoeling_almost_finished) = !id(zoutspoeling_almost_finished);
-            ESP_LOGD("custom", "Zoutspoeling almost finished flag toggled to: %s", id(zoutspoeling_almost_finished) ? "true" : "false");
+            id(zoutspoeling_almost_finished) = state;
+            ESP_LOGD("custom", "Zoutspoeling almost finished flag set to: %s", state ? "true" : "false");
 
 globals:
   - id: totalWaterUsage
