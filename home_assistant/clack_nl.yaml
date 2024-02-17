@@ -109,6 +109,12 @@ automation:
       - platform: state
         entity_id: binary_sensor.clack_regeneratie_pulse
         to: 'on'
+      - platform: device
+        device_id: 6296c1ffec0e3af6d4dc75ab01bfa0d6
+        #device_id: 'Clack'
+        domain: button
+        entity_id: button.clack_test_button_regen_pulse
+        type: pressed
     condition:
       - condition: template
         value_template: "{{ not is_state('binary_sensor.clack_regeneratie_pulse', 'unavailable') }}"

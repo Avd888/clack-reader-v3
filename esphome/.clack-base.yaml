@@ -61,6 +61,12 @@ globals:
     type: bool
     initial_value: 'false'
 
+# Define a global variable to store last value of the distance
+  - id: distance_cm_last_value
+    type: float
+    restore_value: true
+    initial_value: '0.0'
+
 script:
 ###  On reboot or powerloss of the esp, set the time left, last regeneration time, and capacity counters
   - id: on_boot
@@ -104,6 +110,11 @@ script:
       - delay: 5s
       - light.turn_off:
           id: led
+      - lambda: |-
+          if (id(distance_cm_last_value) != 0.0) {
+            id(clack_distance).publish_state(id(distance_cm_last_value));
+          }
+
 
 ###  Define a script that turns on the chlorinator relay, waits for the duration, and turns it off
   - id: chlorinator_start
@@ -185,6 +196,9 @@ sensor:
                   id: clack_distance
                   state: !lambda |- 
                     return id(distance_cm).state;
+              - globals.set:
+                id: distance_cm_last_value
+                value: !lambda 'return x;'
 
   ##
   # ultrasonic distance sensor.

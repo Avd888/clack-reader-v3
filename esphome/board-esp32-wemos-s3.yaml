@@ -186,12 +186,3 @@ button:
             - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
             then:
               - script.execute: chlorinator_start
-
-sensor:
-  - platform: uptime
-    name: "Uptime Sensor"
-    id: uptime_sensor
-    update_interval: 60s
-    filters:
-      - lambda: return x / 60.0; // Converts uptime to minutes
-    unit_of_measurement: "minutes"
