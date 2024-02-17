@@ -104,29 +104,26 @@ automation:
   ####################################################
   - id: set_water_softener_start_backwash
     alias: Ontharder - Set water softener start backwash
+    description: ''
     trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.clack_regeneratie_pulse
-      to: 'on'
-    - platform: state
-      entity_id: button.clack_test_button_regen_pulse
+      - platform: state
+        entity_id: binary_sensor.clack_regeneratie_pulse
+        to: 'on'
     condition:
-    - condition: and
-      conditions:
-      - condition: state
-        entity_id: input_select.clack_water_softener_status
-        state: standby
+      - condition: template
+        value_template: "{{ not is_state('binary_sensor.clack_regeneratie_pulse', 'unavailable') }}"
+      - condition: template
+        value_template: "{{ now().timestamp() | int - states('sensor.uptime') | int * 60 > 300 }}"
     action:
-    - service: input_select.select_option
-      data:
-        entity_id: input_select.clack_water_softener_status
-        option: terugspoeling
-    - service: timer.start
-      entity_id: timer.timer_ws_backwash
-    - service: timer.start
-      entity_id: timer.timer_ws_total
-    initial_state: true
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.clack_water_softener_status
+          option: 'terugspoeling'
+      - service: timer.start
+        entity_id: timer.timer_ws_backwash
+      - service: timer.start
+        entity_id: timer.timer_ws_total
+    mode: single
   ####################################################
   - id: set_water_softener_start_brine
     alias: Ontharder - Set water softener start brine
