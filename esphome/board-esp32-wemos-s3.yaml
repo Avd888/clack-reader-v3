@@ -151,41 +151,41 @@ button:
             ESP_LOGI("UseTest", "Use button pressed");
 
 # ## temporary test button for testing regeneration pulse
-  # - id: clack_reg_test_button
-    # name: ${name} Test button regen pulse
-    # platform: template
-    # on_press:
-      # then:
-        # - globals.set:
-            # id: totalWaterUsage
-            # value: '00'
-        # - text_sensor.template.publish:
-            # id: clack_regeneration_last
-            # state: !lambda |-
-              # char str[32];
-              # time_t currTime = id(clack_sntp_time).now().timestamp;
-              # strftime(str, sizeof(str), "%a %d %b %H:%M", localtime(&currTime));
-              # id(regeneration_last) = str;
-              # return  { str };
-        # - sensor.template.publish:
-            # id: clack_watermeter
-            # state: !lambda |-
-              # return id(totalWaterUsage);
-        # - sensor.template.publish:
-            # id: clack_m3_left
-            # state: !lambda |-
-              # return float(id(clack_capacity_liters).state - id(clack_watermeter).state) * 0.001;
-        # - sensor.template.publish:
-            # id: clack_l_left
-            # state: !lambda |-
-              # return int(id(clack_capacity_liters).state - id(clack_watermeter).state);
-        # - lambda: |-
-            # ESP_LOGI("RegTest", "Regeneration button pressed");
-        # - if:
-            # condition:
-            # - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
-            # then:
-              # - script.execute: chlorinator_start
+  - id: clack_reg_test_button
+    name: ${name} Test button regen pulse
+    platform: template
+    on_press:
+      then:
+        - globals.set:
+            id: totalWaterUsage
+            value: '00'
+        - text_sensor.template.publish:
+            id: clack_regeneration_last
+            state: !lambda |-
+              char str[32];
+              time_t currTime = id(clack_sntp_time).now().timestamp;
+              strftime(str, sizeof(str), "%a %d %b %H:%M", localtime(&currTime));
+              id(regeneration_last) = str;
+              return  { str };
+        - sensor.template.publish:
+            id: clack_watermeter
+            state: !lambda |-
+              return id(totalWaterUsage);
+        - sensor.template.publish:
+            id: clack_m3_left
+            state: !lambda |-
+              return float(id(clack_capacity_liters).state - id(clack_watermeter).state) * 0.001;
+        - sensor.template.publish:
+            id: clack_l_left
+            state: !lambda |-
+              return int(id(clack_capacity_liters).state - id(clack_watermeter).state);
+        - lambda: |-
+            ESP_LOGI("RegTest", "Regeneration button pressed");
+        - if:
+            condition:
+            - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
+            then:
+              - script.execute: chlorinator_start
 
 sensor:
   - platform: uptime

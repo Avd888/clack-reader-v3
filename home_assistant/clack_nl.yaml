@@ -113,7 +113,7 @@ automation:
       - condition: template
         value_template: "{{ not is_state('binary_sensor.clack_regeneratie_pulse', 'unavailable') }}"
       - condition: template
-        value_template: "{{ now().timestamp() | int - states('sensor.uptime') | int * 60 > 300 }}"
+        value_template: "{{ now().timestamp() | int - states('sensor.uptime_sensor') | int * 60 > 300 }}"
     action:
       - service: input_select.select_option
         data:
