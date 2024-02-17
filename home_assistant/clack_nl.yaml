@@ -13,7 +13,7 @@ input_select:
       - vullen
       - standby
     initial: standby
-    
+
 input_boolean:
   zoutspoeling_almost_finished:
     name: Zoutspoeling Almost Finished
@@ -29,8 +29,6 @@ input_number:
     step: 1
     unit_of_measurement: 'minutes'
     icon: mdi:timer-outline
-    
-    
 #-----------
 #TIMERS       
 #-----------
@@ -38,28 +36,28 @@ input_number:
 timer:
   timer_ws_backwash:
     name: terugspoeling
-#    duration: '0:00:57'  
-    duration: '0:00:10'
+    duration: '0:00:10'  
+    #duration: '0:02:10' #original
 
   timer_ws_brine:
     name: zoutspoeling
-#    duration: '0:01:07'
-    duration: '0:00:10'
+    duration: '0:01:10'
+    #duration: '0:57:16' #original
 
   timer_ws_rinse:
     name: snelspoeling
-#    duration: '0:01:14'
     duration: '0:00:10'
+    #duration: '0:03:05' #original
 
   timer_ws_fill:
     name: vullen
-#    duration: '0:01:10'
     duration: '0:00:10'
+    #duration: '0:04:55' #original
 
   timer_ws_total:  #sum of all above values
     name: total
-#    duration: '0:05:44'
-    duration: '0:00:40'
+    duration: '0:01:40'
+    #duration: '1:07:26' #orginal
 
 #-----------
 #SENSORS
@@ -104,32 +102,32 @@ automation:
   ####################################################
   - id: set_water_softener_start_backwash
     alias: Ontharder - Set water softener start backwash
-    description: ''
     trigger:
-      - platform: state
-        entity_id: binary_sensor.clack_regeneratie_pulse
-        to: 'on'
-      - platform: device
-        device_id: 6296c1ffec0e3af6d4dc75ab01bfa0d6
-        #device_id: 'Clack'
-        domain: button
-        entity_id: button.clack_test_button_regen_pulse
-        type: pressed
+    - platform: state
+      entity_id:
+      - binary_sensor.clack_regeneratie_pulse
+      to: 'on'
+    # - platform: device
+      # device_id: 6296c1ffec0e3af6d4dc75ab01bfa0d6
+      # domain: button
+      # entity_id: button.clack_test_button_regen_pulse
+      # type: pressed
     condition:
-      - condition: template
-        value_template: "{{ not is_state('binary_sensor.clack_regeneratie_pulse', 'unavailable') }}"
-      - condition: template
-        value_template: "{{ now().timestamp() | int - states('sensor.uptime_sensor') | int * 60 > 300 }}"
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: input_select.clack_water_softener_status
+        state: standby
     action:
-      - service: input_select.select_option
-        data:
-          entity_id: input_select.clack_water_softener_status
-          option: 'terugspoeling'
-      - service: timer.start
-        entity_id: timer.timer_ws_backwash
-      - service: timer.start
-        entity_id: timer.timer_ws_total
-    mode: single
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.clack_water_softener_status
+        option: terugspoeling
+    - service: timer.start
+      entity_id: timer.timer_ws_backwash
+    - service: timer.start
+      entity_id: timer.timer_ws_total
+    initial_state: true
   ####################################################
   - id: set_water_softener_start_brine
     alias: Ontharder - Set water softener start brine
@@ -306,7 +304,9 @@ automation:
               - service: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.zoutspoeling_almost_finished
-              - service: esphome.Clack_toggle_zoutspoeling_almost_finished
+              - service: esphome.Clack_set_zoutspoeling_almost_finished
+                data:
+                  state: true
           - conditions:
               - condition: template
                 value_template: "{{ trigger.platform == 'event' }}"
@@ -314,5 +314,7 @@ automation:
               - service: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.zoutspoeling_almost_finished
-              - service: esphome.Clack_toggle_zoutspoeling_almost_finished
+              - service: esphome.Clack_set_zoutspoeling_almost_finished
+                data:
+                  state: false
     mode: single
