@@ -32,6 +32,11 @@ api:
             id: clack_l_left
             state: !lambda |-
               return int(id(clack_capacity_liters).state - id(clack_watermeter).state);
+    - service: toggle_zoutspoeling_almost_finished
+      then:
+        - lambda: |-
+            id(zoutspoeling_almost_finished) = !id(zoutspoeling_almost_finished);
+            ESP_LOGD("custom", "Zoutspoeling almost finished flag toggled to: %s", id(zoutspoeling_almost_finished) ? "true" : "false");
 
 globals:
   - id: totalWaterUsage
@@ -50,6 +55,11 @@ globals:
     type: std::string
     restore_value: yes
     initial_value: '"Never"'
+    
+# Define a global variable for zoutspoeling almost finished
+  - id: zoutspoeling_almost_finished
+    type: bool
+    initial_value: 'false'
 
 script:
 ###  On reboot or powerloss of the esp, set the time left, last regeneration time, and capacity counters
@@ -156,21 +166,25 @@ sensor:
       - filter_out: nan
       - lambda: return x*100;
       ### comment with # if you want a direct reading
-      - median:
-          window_size: 15
-          send_every: 7
-          send_first_at: 1
-      - delta: 0.5
+      #- median:
+      #    window_size: 15
+      #    send_every: 7
+      #    send_first_at: 1
+      #- delta: 0.5
       ###
       - clamp:
           min_value: 0.0
           max_value: 160.0
     on_value:
       then:
-        - sensor.template.publish:
-            id: clack_distance
-            state: !lambda |-
-              return id(distance_cm).state;
+        - if:
+            condition:
+              lambda: return id(zoutspoeling_almost_finished);
+            then:
+              - sensor.template.publish:
+                  id: clack_distance
+                  state: !lambda |- 
+                    return id(distance_cm).state;
 
   ##
   # ultrasonic distance sensor.

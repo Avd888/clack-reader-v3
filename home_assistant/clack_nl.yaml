@@ -14,6 +14,23 @@ input_select:
       - standby
     initial: standby
     
+input_boolean:
+  zoutspoeling_almost_finished:
+    name: Zoutspoeling Almost Finished
+    initial: off
+    icon: mdi:timer-sand
+    
+input_number:
+  zoutspoeling_alert_time:
+    name: Zoutspoeling Alert Time Before Finish
+    initial: 5
+    min: 1
+    max: 10
+    step: 1
+    unit_of_measurement: 'minutes'
+    icon: mdi:timer-outline
+    
+    
 #-----------
 #TIMERS       
 #-----------
@@ -86,7 +103,7 @@ utility_meter:
 automation:
   ####################################################
   - id: set_water_softener_start_backwash
-    alias: Set water softener start backwash
+    alias: Ontharder - Set water softener start backwash
     trigger:
     - platform: state
       entity_id:
@@ -112,7 +129,7 @@ automation:
     initial_state: true
   ####################################################
   - id: set_water_softener_start_brine
-    alias: Set water softener start brine
+    alias: Ontharder - Set water softener start brine
     trigger:
     - platform: event
       event_type: timer.finished
@@ -134,7 +151,7 @@ automation:
     initial_state: true
   ####################################################
   - id: set_water_softener_start_rinse
-    alias: Set water softener start rinse
+    alias: Ontharder - Set water softener start rinse
     trigger:
     - platform: event
       event_type: timer.finished
@@ -156,7 +173,7 @@ automation:
     initial_state: true
   ####################################################
   - id: set_water_softener_start_fill
-    alias: Set water softener start fill
+    alias: Ontharder - Set water softener start fill
     trigger:
     - platform: event
       event_type: timer.finished
@@ -178,7 +195,7 @@ automation:
     initial_state: true
   ####################################################
   - id: set_water_softener_idle
-    alias: Set water softener Idle
+    alias: Ontharder - Set water softener Idle
     trigger:
     - platform: event
       event_type: timer.finished
@@ -208,7 +225,7 @@ automation:
   # vul je eigen mobile_app_iphone_van_xxx in. (als voorbeeld)            
   #------------------------------------------------------------------
   - id: salt_level_alarm_notify
-    alias: Zoutniveau alarm melding
+    alias: Ontharder - Zoutniveau alarm melding
     description: ''
     trigger:
     - platform: state
@@ -235,7 +252,7 @@ automation:
     mode: single
   ##################################################
   - id: measure_hardness_notify
-    alias: Hardheid meten
+    alias: Ontharder - Hardheid meten
     description: ''
     trigger:
     - platform: numeric_state
@@ -261,3 +278,38 @@ automation:
         minutes: 30
     mode: single
     initial_state: 'true'
+#################################################################
+  - id: zoutspoeling_almost_finished_alert
+    alias: "Ontharder - Zoutspoeling Almost Finished Alert"
+    description: "Sets the input boolean to on when the zoutspoeling timer is X minutes before it ends, and turns it off when the timer is done."
+    trigger:
+      - platform: template
+        value_template: >
+          {% set finish_time = state_attr('timer.timer_ws_brine', 'finishes_at') %}
+          {% set remaining_seconds = '00:00:00' if finish_time is none else (as_datetime(finish_time) - now()).total_seconds() %}
+          {% set alert_time_seconds = (states('input_number.zoutspoeling_alert_time') | int) * 60 %}
+          {{ remaining_seconds > 0 and remaining_seconds <= alert_time_seconds }}
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.timer_ws_brine
+    condition: []
+    action:
+      - choose:
+          - conditions: 
+              - condition: template
+                value_template: "{{ trigger.platform == 'template' }}"
+            sequence:
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.zoutspoeling_almost_finished
+              - service: esphome.Clack_toggle_zoutspoeling_almost_finished
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.platform == 'event' }}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.zoutspoeling_almost_finished
+              - service: esphome.Clack_toggle_zoutspoeling_almost_finished
+    mode: single
