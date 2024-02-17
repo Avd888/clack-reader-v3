@@ -100,7 +100,7 @@ binary_sensor:
     on_press:
       then:
         - lambda: |-
-            if (id(sensor.clack_uptime).state < 30) { // Adjust the 30 seconds threshold as needed
+            if (id(uptime_sensor).state < 30) { // Adjust the 30 seconds threshold as needed
               ESP_LOGI("init", "Skipping actions due to recent reboot.");
               return;
             }
@@ -193,3 +193,12 @@ button:
             - lambda: 'return id(clack_select_chl_or_dpsw).state == "Chlorinator";'
             then:
               - script.execute: chlorinator_start
+
+sensor:
+  - platform: uptime
+    name: "Uptime Sensor"
+    id: uptime_sensor
+    update_interval: 60s
+    filters:
+      - lambda: return x / 60.0; // Converts uptime to minutes
+    unit_of_measurement: "minutes"
