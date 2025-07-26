@@ -1,6 +1,7 @@
 # Basics
 esphome:
-  name: ${name}
+  name: clack
+  friendly_name: clack
   on_boot:
     priority: 200
     then:
