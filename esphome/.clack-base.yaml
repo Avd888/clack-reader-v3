@@ -1,13 +1,13 @@
 # Basics
 esphome:
-  name: 'Clack'
-  friendly_name: 'Clack'
+  name: clack
+  friendly_name: clack
   on_boot:
     priority: 200
     then:
       - script.execute: on_boot
 
-# OTA:
+ # OTA:
 ota:
   platform: esphome
   
@@ -34,13 +34,22 @@ api:
             id: clack_l_left
             state: !lambda |-
               return int(id(clack_capacity_liters).state - id(clack_watermeter).state);
+<<<<<<< HEAD
     - service: set_brine_almost_finished
+=======
+    - service: set_zoutspoeling_almost_finished
+>>>>>>> main
       variables:
         state: bool
       then:
         - lambda: |-
+<<<<<<< HEAD
             id(brine_almost_finished) = state;
             ESP_LOGD("custom", "Brine almost finished flag set to: %s", state ? "true" : "false");
+=======
+            id(zoutspoeling_almost_finished) = state;
+            ESP_LOGD("custom", "Zoutspoeling almost finished flag set to: %s", state ? "true" : "false");
+>>>>>>> main
 
 globals:
   - id: totalWaterUsage
@@ -66,8 +75,13 @@ globals:
     restore_value: yes
     initial_value: '"Never"'
     
+<<<<<<< HEAD
 # Define a global variable for brine almost finished
   - id: brine_almost_finished
+=======
+# Define a global variable for zoutspoeling almost finished
+  - id: zoutspoeling_almost_finished
+>>>>>>> main
     type: bool
     initial_value: 'false'
 
@@ -100,6 +114,11 @@ script:
           condition:
             api.connected:
       - delay: 5s
+<<<<<<< HEAD
+=======
+      - light.turn_off:
+          id: led
+>>>>>>> main
       - lambda: |-
           if (id(distance_cm_last_value) != 0.0) {
             id(clack_distance).publish_state(id(distance_cm_last_value));
@@ -161,7 +180,13 @@ script:
 button:
   - platform: restart
     id: restart_button
+<<<<<<< HEAD
     name: ${clack_restart}
+=======
+    name: ${name} ${clack_restart}
+    
+
+>>>>>>> main
 
 #-----------
 #SENSORS
@@ -212,7 +237,22 @@ sensor:
           max_value: 160.0
     on_value:
       then:
+<<<<<<< HEAD
         - script.execute: set_preference_distance_readout
+=======
+        - if:
+            condition:
+              lambda: return id(zoutspoeling_almost_finished);
+            then:
+              - sensor.template.publish:
+                  id: clack_distance
+                  state: !lambda |- 
+                    return id(distance_cm).state;
+              - globals.set:
+                  id: distance_cm_last_value
+                  value: !lambda 'return x;'
+
+>>>>>>> main
   ##
   # ultrasonic distance sensor.
   - platform: template

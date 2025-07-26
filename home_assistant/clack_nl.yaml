@@ -16,8 +16,13 @@ input_select:
     initial: standby
 
 input_boolean:
+<<<<<<< HEAD
   brine_almost_finished:
     name: "Zoutspoeling bijna klaar"
+=======
+  zoutspoeling_almost_finished:
+    name: Zoutspoeling Almost Finished
+>>>>>>> main
     initial: off
     icon: mdi:timer-sand
   clack_manual_regen:
@@ -26,14 +31,24 @@ input_boolean:
     icon: mdi:water-pump-off
     
 input_number:
+<<<<<<< HEAD
   brine_alert_time:
     name: "Zoutspoeling trigger voor eind"
+=======
+  zoutspoeling_alert_time:
+    name: Zoutspoeling Alert Time Before Finish
+>>>>>>> main
     initial: 5
     min: 1
     max: 10
     step: 1
     unit_of_measurement: 'minutes'
     icon: mdi:timer-outline
+<<<<<<< HEAD
+=======
+    
+
+>>>>>>> main
 
 #-----------
 #TIMERS       
@@ -42,6 +57,7 @@ input_number:
 timer:
   timer_ws_backwash:
     name: terugspoeling
+<<<<<<< HEAD
     #duration: '0:02:10'  
     duration: '0:01:00' #original
 
@@ -64,6 +80,30 @@ timer:
     name: total
     #duration: '1:07:26'
     duration: '0:35:00' #orginal
+=======
+    #duration: '0:00:10'  
+    duration: '0:02:10' #original
+
+  timer_ws_brine:
+    name: zoutspoeling
+    #duration: '0:01:10'
+    duration: '0:57:16' #original
+
+  timer_ws_rinse:
+    name: snelspoeling
+    #duration: '0:00:10'
+    duration: '0:03:05' #original
+
+  timer_ws_fill:
+    name: vullen
+    #duration: '0:00:10'
+    duration: '0:04:55' #original
+
+  timer_ws_total:  #sum of all above values
+    name: total
+    #duration: '0:01:40'
+    duration: '1:07:26' #orginal
+>>>>>>> main
 
 #-----------
 #SENSORS
@@ -113,8 +153,11 @@ automation:
       entity_id:
       - binary_sensor.clack_regeneratie_pulse
       to: 'on'
-    - platform: state
-      entity_id: button.clack_test_button_regen_pulse
+    # - platform: device
+      # device_id: 6296c1ffec0e3af6d4dc75ab01bfa0d6
+      # domain: button
+      # entity_id: button.clack_test_button_regen_pulse
+      # type: pressed
     condition:
     - condition: and
       conditions:
@@ -254,10 +297,17 @@ automation:
         minutes: 30
     initial_state: 'true'
     mode: single
+<<<<<<< HEAD
 ################################################
   - id: brine_almost_finished_alert
     alias: "Softener - Brine Almost Finished Alert"
     description: "Sets the input boolean to on when the brine timer is X minutes before it ends, and turns it off when the timer is done."
+=======
+  ##################################################
+  - id: measure_hardness_notify
+    alias: Ontharder - Hardheid meten
+    description: ''
+>>>>>>> main
     trigger:
       - platform: template
         value_template: >
@@ -293,9 +343,55 @@ automation:
                 data:
                   state: false
     mode: single
+<<<<<<< HEAD
 ################################################
   - id: 'clack_manual_regen_control'
     alias: "Softener - Clack Manual Regen Control"
+=======
+    initial_state: 'true'
+#################################################################
+  - id: zoutspoeling_almost_finished_alert
+    alias: "Ontharder - Zoutspoeling Almost Finished Alert"
+    description: "Sets the input boolean to on when the zoutspoeling timer is X minutes before it ends, and turns it off when the timer is done."
+    trigger:
+      - platform: template
+        value_template: >
+          {% set finish_time = state_attr('timer.timer_ws_brine', 'finishes_at') %}
+          {% set remaining_seconds = '00:00:00' if finish_time is none else (as_datetime(finish_time) - now()).total_seconds() %}
+          {% set alert_time_seconds = (states('input_number.zoutspoeling_alert_time') | int) * 60 %}
+          {{ remaining_seconds > 0 and remaining_seconds <= alert_time_seconds }}
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.timer_ws_brine
+    condition: []
+    action:
+      - choose:
+          - conditions: 
+              - condition: template
+                value_template: "{{ trigger.platform == 'template' }}"
+            sequence:
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.zoutspoeling_almost_finished
+              - service: esphome.Clack_set_zoutspoeling_almost_finished
+                data:
+                  state: true
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.platform == 'event' }}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.zoutspoeling_almost_finished
+              - service: esphome.Clack_set_zoutspoeling_almost_finished
+                data:
+                  state: false
+    mode: single
+################################################
+  - id: 'clack_manual_regen_control'
+    alias: "Ontharder - Clack Manual Regen Control"
+>>>>>>> main
     description: "Automates the Clack chlorinator for manual regen and auto-off."
     trigger:
       - platform: state
