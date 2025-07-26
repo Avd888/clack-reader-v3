@@ -176,18 +176,6 @@ script:
                       value: !lambda |-
                         return id(distance_cm).state;
 
-light:
-#G47=RGB WS2812C-2020
-  - platform: esp32_rmt_led_strip
-    name: Led
-    id: led
-    rgb_order: GRB
-    pin: 47
-    num_leds: 4
-    # RMT 0 channels will be occupied by IR
-    rmt_channel: 1
-    chipset: ws2812
-    restore_mode: ALWAYS_OFF
 
 ###  ESP restart button
 button:
